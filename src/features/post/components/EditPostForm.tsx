@@ -14,7 +14,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { toast } from "@/components/ui/toast";
 import { LoaderCircle } from "lucide-react";
-import { redirect } from "next/navigation";
+import {useRouter } from "next/navigation";
 import { postspath } from "@/lib/path";
 
 
@@ -24,7 +24,7 @@ interface EditPostFormProps{
 }
 
 export default function EditPostForm ({post}:EditPostFormProps){
-
+const router=useRouter();
   const {execute,isPending,hasSucceeded,hasErrored} = useAction(updatePost);
 
   const form = useForm<z.infer<typeof UpdatePostSchema>>({
@@ -54,9 +54,9 @@ export default function EditPostForm ({post}:EditPostFormProps){
             description: "Post updated  successfully",
           });
 
-          setTimeout(()=>{
-        redirect(postspath)
-          },1000)
+         router.push(postspath) 
+
+      
     };
 
     if(hasErrored){
