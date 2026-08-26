@@ -4,5 +4,7 @@ export const UpdatePostSchema = z.object({
     id:z.string(),
   title: z.string().trim().min(3,"Title must be ...").max(80,"Title must not exceed..."),
     director: z.string().trim().min(3,"Name must be ...").max(40,"Name must not exceed..."),
-    review: z.string().min(3).max(100,"Comments must not exceed...")
+    review: z.string().min(3).max(100,"Comments must not exceed..."),
+    image:z.array(z.any()).optional(),
+      tags:z.array(z.string().trim().min(1).max(20)).max(5)
 });

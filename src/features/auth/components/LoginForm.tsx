@@ -13,15 +13,18 @@ import { useEffect } from "react";
 import { toast } from "@/components/ui/toast";
 import { LoaderCircle } from "lucide-react";
 import { login } from "../actions/login";
-import { useRouter } from "next/navigation";
-import { homePath } from "@/lib/path";
+import Link from "next/link";
+import { homePath, loginPath, postspath, registerPath, resetPasswordPath } from "@/lib/path";
+import GithubButton from "./GithubButton";
+import { redirect, useRouter } from "next/navigation";
+
 
 
 
 export default function LoginForm(){
 
-  const {execute,isPending,hasSucceeded,hasErrored} = useAction(login);
-//   const router=useRouter();
+  const {execute,isPending,result} = useAction(login);
+  const router=useRouter();
 
 
     const form = useForm<z.infer<typeof authLoginSchema>>({
@@ -38,28 +41,35 @@ export default function LoginForm(){
         };
 
          useEffect(()=>{
-    if(hasSucceeded){
+          const data=result.data;
+
+           if(!data){
+      return;
+    }
+
+    if(data?.success){
         form.reset();
         toast.add({
             type: "success",
             description: "Signed-in successfully",
           });
 
-    //    router.push(homePath)
+      router.push(homePath);
+      router.refresh();
     };
 
-     if(hasErrored){
+     if(!data?.success){
         toast.add({
             type: "failed",
-            description: "Something Went Wrong.",
+            description:data?.error ,
           });
     }
-  },[hasErrored,hasSucceeded])
+  },[result])
 
     return(
         <Card>
         <CardHeader>
-            <CardTitle>Register Form</CardTitle>
+            <CardTitle>Login</CardTitle>
         </CardHeader>
         <CardContent>
             <form id="register-form" onSubmit={form.handleSubmit(onSubmit)}>
@@ -114,13 +124,22 @@ export default function LoginForm(){
 
 
                 </FieldGroup>
-                <Button className="my-5" type="submit" disabled={isPending}>
+                <Button className="my-5 w-full" type="submit" disabled={isPending}>
                              {
                         isPending ? (<LoaderCircle className="animate-spin h-4 w-4"/>) : ("Login")
                          }
                         </Button>
             </form>
+            <hr className="my-4"/>
+                        <GithubButton/>
+             <div className="flex items-center justify-between text-sm text-muted-foreground font-medium">
+                <p>Don't have an account? <Link href={registerPath} className="underline">Sign Up</Link></p>
+                <Link href={resetPasswordPath} className="underline">Forgot password?</Link>
+              </div>
+            
         </CardContent>
+         
         </Card>
     )
 }
+

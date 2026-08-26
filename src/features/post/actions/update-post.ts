@@ -1,18 +1,32 @@
 "use server";
 
-import { postspath } from "@/lib/path";
+import { loginPath, postspath } from "@/lib/path";
 import prisma from "@/lib/prisma";
 import { actionClient } from "@/lib/safe-action";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { UpdatePostSchema } from "../schemas";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { isOwner } from "@/lib/isOwner";
 
 
 export const updatePost = actionClient
   .inputSchema(UpdatePostSchema)
-  .action(async ({ parsedInput: { id,title, director,review } }) => {
+  .action(async ({ parsedInput: { id,title, director,review,image=[],tags=[] } }) => {
+    const session = await auth.api.getSession({
+        headers: await headers() 
+    });
+
+    if(!session){
+      redirect(loginPath)
+    };
+
     try{
 
+      if(!isOwner(session?.user.id)){
+        throw new Error("U are not owner.")
+      }
 
   await prisma.post.update({
     where:{
@@ -21,7 +35,9 @@ export const updatePost = actionClient
      data:{
         title,
         director,
-        review
+        review,
+        image,
+        tags
     }
   })
 }catch(err){

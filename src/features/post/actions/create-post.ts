@@ -1,17 +1,27 @@
 "use server";
 
-import { postspath } from "@/lib/path";
+import { loginPath, postspath } from "@/lib/path";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { CreatePostSchema } from "../schemas";
 import { actionClient } from "@/lib/safe-action";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 
 
 
 export const createPost = actionClient
 	.inputSchema(CreatePostSchema)
-	.action(async ({ parsedInput: { title, director,review } }) => {
+	.action(async ({ parsedInput: { title, director,review,image=[],tags=[]} }) => {
+    const session = await auth.api.getSession({
+    headers: await headers() 
+});
+
+ if(!session){
+  redirect(loginPath)
+ }
 		try{
 
    
@@ -19,11 +29,15 @@ export const createPost = actionClient
     data:{
         title,
         director,
-        review
+        review,
+        image,
+        tags,
+        userId:session?.user?.id
     }
   });
 
-  revalidatePath(postspath)
+  revalidatePath(postspath);
+  
 
  
   }catch(err){

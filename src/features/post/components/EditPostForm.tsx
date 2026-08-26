@@ -42,7 +42,9 @@ const router=useRouter();
       id:data.id,
       title:data.title,
       director:data.director,
-      review:data.review
+      review:data.review,
+      tags:data.tags,
+      image:data.image
     })
   
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,12 +13,17 @@ import { register } from "../actions/register";
 import { useEffect } from "react";
 import { toast } from "@/components/ui/toast";
 import { LoaderCircle } from "lucide-react";
+import { loginPath } from "@/lib/path";
+import Link from "next/link";
+import GithubButton from "./GithubButton";
+import { useRouter } from "next/navigation";
 
 
 
 export default function RegisterForm(){
 
-  const {execute,isPending,hasSucceeded,hasErrored} = useAction(register);
+  const {execute,isPending,result} = useAction(register);
+  const router=useRouter();
 
 
     const form = useForm<z.infer<typeof authRegisterSchema>>({
@@ -37,21 +42,28 @@ export default function RegisterForm(){
         };
 
          useEffect(()=>{
-    if(hasSucceeded){
-        form.reset();
+          const data=result.data;
+    if(!data){
+      return;
+    }
+
+    if(data?.success){
+       form.reset();
         toast.add({
             type: "success",
-            description: "Account created  successfully",
+            description: "Registered Successfully",
           });
+          router.push(loginPath);
+              
     };
 
-     if(hasErrored){
+     if(!data?.success){
         toast.add({
             type: "failed",
-            description: "Something Went Wrong.",
+            description: data?.error,
           });
     }
-  },[hasErrored,hasSucceeded])
+  },[result])
 
     return(
         <Card>
@@ -155,12 +167,18 @@ export default function RegisterForm(){
             />
 
                 </FieldGroup>
-                <Button className="my-5" type="submit" disabled={isPending}>
+                <Button className="my-5 w-full" type="submit" disabled={isPending}>
                              {
                         isPending ? (<LoaderCircle className="animate-spin h-4 w-4"/>) : ("Register")
                          }
                         </Button>
             </form>
+            <hr className="my-4"/>
+            <GithubButton/>
+          
+             <p className="text-sm text-muted-foreground font-medium">Already have an account? <Link href={loginPath} className="underline">Sign in</Link></p>
+             
+            
         </CardContent>
         </Card>
     )

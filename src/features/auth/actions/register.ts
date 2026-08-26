@@ -1,6 +1,6 @@
 "use server";
 
-import { loginPath} from "@/lib/path";
+import { homePath, loginPath} from "@/lib/path";
 import { authRegisterSchema} from "../schemas";
 import { actionClient } from "@/lib/safe-action";
 import { redirect } from "next/navigation";
@@ -21,13 +21,24 @@ export const register = actionClient
         email,
         password
     }
-   })
+   });
+
+   return {
+    success:true,
+    error:null
+   }
  
-  }catch(err){
- throw new Error("Something went wrong !!!")
+  }catch(err:any){
+    console.log(err);
+    const errorMessage=err.message||err.body.message||"Something Went wrong";
+
+    return {
+        success:false,
+        error:errorMessage
+    }
+ 
   };
 
-   redirect(loginPath)
 
     });
 

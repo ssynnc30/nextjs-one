@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
+
 
 @custom-variant dark (&:is(.dark *));
 
@@ -130,3 +132,31 @@
     @apply font-sans;
   }
 }
+
+/* ------------------------------------------------ */
+.tiptap-editor .tiptap p {
+  margin: 0.5rem 0;
+}
+
+.tiptap-editor .tiptap h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 700;
+  /* margin: 1rem 0; */
+}
+
+.tiptap-editor .tiptap h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  /* margin: 1rem 0; */
+}
+
+.tiptap-editor .tiptap h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  /* margin: 0.75rem 0; */
+}
+
+/* ------------------------------------------------- */

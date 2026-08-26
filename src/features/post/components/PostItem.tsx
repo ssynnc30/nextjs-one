@@ -1,6 +1,4 @@
-"use client";
 
-import { PostItemProps } from "../types/types";
 import Link from "next/link";
 import { ArrowUpRightIcon } from "lucide-react";
 import {
@@ -14,30 +12,52 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { editPostPath, detailsPostPath} from "@/lib/path";
-import { cn } from "@/lib/utils";
-import { deletePost } from "@/features/post/actions/delete-post";
-import { useTransition } from "react";
-import { LoaderCircle } from "lucide-react";
 import { DeleteButton } from "./DeleteButton";
+import { Post, User } from "@/generated/prisma/client";
+import { isOwner } from "@/lib/isOwner";
+import ImageGallery from "./ImageGallery";
+import VoteButton from "@/features/vote/components/VoteButton";
+import getSession from "@/lib/getSession";
+import { Badge } from "@/components/ui/badge";
 
 
-export default function PostItem ({id,title,description,isCard=true}:PostItemProps){
+interface PostItemProps extends Post{
+  isCard?:boolean,
+  user:User,
+  votes:{value:number,userId:string}[];
+}
 
-    const [isPending,startTransition]=useTransition();
+export default async function PostItem ({id,title,director,review,isCard=true,user,image,votes,tags}:PostItemProps){
 
-    const deletePostHandler=()=>{
-        startTransition(async()=>{
-            await deletePost({id:id as string})
-        })
-    }
-
-
+const session=await getSession();
+const currentUserId=session?.user.id;
+const userVote=currentUserId? votes?.find((vote)=>vote.userId===currentUserId)?.value || null :null;
+const score=votes?.reduce((acc,vote)=>acc+vote.value,0) || 0;
     return(
         <Card className="my-5">
   <CardHeader>
     <CardTitle>{title}</CardTitle>
-    <CardDescription className={cn(isCard && "line-clamp-2")}>{description}</CardDescription>
+    <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{__html:review}}/>
+    <p className="py-2">{director}</p>
+    {
+      tags && tags.length >0 && (
+        <div className="flex items-center gap-3">
+          {
+            tags.map((tag)=>(
+              <Link key={tag} href={`/?tag=${tag}`}>
+                <Badge variant={"outline"}>#{tag}</Badge>
+              </Link>
+            ))
+          }
+        </div>
+      )
+    }
   </CardHeader>
+  <CardContent>
+    <p className="py-2">({user.name})</p>
+    <ImageGallery image={image}/>
+    <VoteButton postId={id} initialUserVote={userVote} initialScore={score}/>
+    </CardContent>
  {
     isCard && (
          <CardContent className="flex items-center gap-5">
@@ -48,19 +68,17 @@ export default function PostItem ({id,title,description,isCard=true}:PostItemPro
         </Button>
     </Link>
      <Link href={editPostPath(id)}>
-     <Button>Edit</Button>
+     {
+       await isOwner(user.id) && <Button>Edit</Button>
+     }
      </Link>
   </CardContent>
     )
  }
+ 
  {
-  !isCard && (
+  !isCard && (await isOwner(user.id)) &&  (
     <CardFooter>
-  {/* <Button onClick={deletePostHandler} disabled={isPending} >
-    {
-      isPending ? (<LoaderCircle className="animate-spin h-4 w-4"/>) : ("Delete")
-    }
-  </Button> */}
   <DeleteButton id={id as string}/>
  </CardFooter>
   )

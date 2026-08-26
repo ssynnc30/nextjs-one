@@ -1,26 +1,29 @@
-import { aboutPath, homePath, loginPath, postspath, registerPath } from "@/lib/path";
+
+import { aboutPath, homePath, loginPath, postspath, profilePath, registerPath } from "@/lib/path";
 import Link from "next/link";
 import { ModeToggle } from "./theme-switch";
 import { Button } from "./ui/button";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { logout } from "@/features/auth/actions/logout";
+import getSession from "@/lib/getSession";
+// import { authClient } from "@/lib/auth-client";
 
 
-export default async function Header (){
+export default async  function  Header (){
 
 
-const session = await auth.api.getSession({
-    headers: await headers() // you need to pass the headers object.
-})
+const session=await getSession();
     
-console.log(session)
+// const {data:session,isPending}=authClient.useSession()
     return (
         <div className="flex justify-between items-center my-8">
             <Link href={homePath} className="text-xl font-bold">LOGO</Link>
             <div className="flex items-center gap-5">
-      <Link href={postspath}>Posts</Link>
+                {
+                    session &&  <Link href={postspath}>My Posts</Link>
+                }
+     
       <Link href={aboutPath}>About</Link>
+     
       {
         session? <LogoutButton/> : <LoginAndRegisterButton/>
       }
@@ -50,8 +53,11 @@ function LoginAndRegisterButton (){
 
 function LogoutButton (){
     return(
-        <form action={logout}>
+       <div className="flex items-center gap-5">
+        <Link href={profilePath}>Profile</Link>
+         <form action={logout}>
             <Button type="submit" className="cursor-pointer">Logout</Button>
         </form>
+       </div>
     )
 }

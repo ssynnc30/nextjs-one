@@ -20,14 +20,22 @@ export const login = actionClient
         email,
         password
     }
-   })
- 
-  }catch(err){
-    console.log(`Error Message ${err}`)
- throw new Error("Something went wrong !!!")
-  };
+   });
 
-    redirect(homePath)
+   return {
+    success:true,
+    error:null
+   }
+ 
+  }catch(err:any){
+  console.log(err);
+    const errorMessage=err.message||err.body.message||"Something Went wrong";
+
+    return {
+        success:false,
+        error:errorMessage
+    }
+  };
 
     });
 
